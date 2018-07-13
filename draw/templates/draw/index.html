@@ -20,16 +20,87 @@
 </body>
 <script>
 
-    // setting up the canvas and one paper tool
-    var canvas = document.getElementById('myCanvas');
-    paper.setup(canvas);
-    var tool = new paper.Tool();
+  // setting up the canvas and one paper tool
+  var canvas = document.getElementById('myCanvas');
+  paper.setup(canvas);
+  var tool = new paper.Tool();
 
-    // getting the URL (you may want to use for Exercise 3)
-    var url = window.location.href;
+  // getting the URL (you may want to use for Exercise 3)
+  var hash = window.location.hash.substring(1);
+  console.log(hash);
 
-    // var socket = new WebSocket(
-    //     'ws://your url here:8765/');
+  var socket = new WebSocket(
+      'ws://p4-cbrown-tnguyen-connorwbrown871042.codeanyapp.com:8765/'
+  );
+  
+  var ids = {}; //{key:"key", value:"value"}
+  //citing Paul Irish, https://www.paulirish.com/2009/random-hex-color-code-snippets/
+  myHex = '#'+Math.floor(Math.random()*16777215).toString(16); //randomize for new browsers
+  if (!(hash === 'display')) {
+    console.log('not display')
+    ids[myHex] = new paper.Path();
+    ids[myHex].strokeColor = myHex;
+  }
+
+  socket.onmessage = function(receivedMessage) {
+//     if id is new, create new path, if not, append
+    console.log(receivedMessage.data);
+    var msg = JSON.parse(receivedMessage.data);
+    console.log(msg);
+    if (hash === 'display') {
+      if (!(msg.id in ids)) {
+        ids[msg.id] = new paper.Path(new paper.Point(msg.point[1], msg.point[2]));
+        ids[msg.id].strokeColor = msg.id;
+        console.log('new stroke added');
+      } else {
+        ids[msg.id].add([msg.point[1], msg.point[2]]);
+        console.log("stroke added");
+      }
+    } else {
+      if (msg.id === myHex) {
+        ids[msg.id].add([msg.point[1], msg.point[2]]);
+        console.log("stroke added");
+      }
+    }
+  }
+  
+  
+  tool.onMouseMove = function(event) {
+    var msg = {
+      text: "hello!",
+      type: "movement",
+      id: myHex,
+      point: event.point
+    };
+    socket.send(JSON.stringify(msg));
+  }
+  
+  
+  //handling tilt event
+  window.addEventListener("deviceorientation", handleOrientation, true);
+  var handleOrientation = function(event) {
+     var rotate = event.gamma;
+     var tilt = event.alpha;
+     if (tilt > 50) or (rotate > 50) {
+       ids[msg.id].strokeColor = myHex;
+     }
+  }
+  
+  //handling shake event
+  window.addEventListener('devicemotion', function(event) {
+    console.log(event.acceleration.x + ' m/s2');
+  });
+  var accelerationX = deviceAcceleration.x;
+  var accelerationY = deviceAcceleration.y;
+  var accelerationZ = deviceAcceleration.z;
+ // var deviceMotionEvent = new DeviceMotionEvent(type[, options])
+//e.acceleration.(x, y, z)
+
+
+
+    
+  
+  
 
 
 </script>
