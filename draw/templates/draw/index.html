@@ -20,11 +20,32 @@
     <canvas id="myCanvas" width="900px" height="900px"></canvas>
 </body>
 <script>
+
+  
+  var myPath;
+	var prevLength;
+
+function onMouseDown(event) {
+	// The mouse was clicked, so let's put a newly created Path into
+	// myPath, give it the color black and add the location as the
+	// path's first segment.
+	myPath = new Path();
+	myPath.strokeColor = 'black';
+	myPath.add(event.point);
+}
+
+function onMouseUp(event) {
+	// The mouse was released, so we add the new location as the end
+	// segment of the line.
+	myPath.add(event.point);
+}
+  
+  
     // getting the URL (you may want to use for Exercise 3)
   var hash = window.location.hash.substring(1);
 
   if (hash === 'display') {
-      $('#myCanvas').css("width", "900px")
+      $('#myCanvas').css("width", "2000px")
       $('#myCanvas').css("height", "900px")
     } else {
       $('#myCanvas').css("width", "300px")
@@ -45,9 +66,11 @@
     console.log("Socket open!");
    };
   
-  var ids = {}; // hex: path
-  var reg = {}; // hex: region rec
-  var offset = {};
+	
+  var ids = []; // hex: path
+	prevLength = ids.length;
+  var reg = []; // hex: region rec
+  var offset = [];
   //citing Paul Irish, https://www.paulirish.com/2009/random-hex-color-code-snippets/
   myHex = '#'+Math.floor(Math.random()*16777215).toString(16); //randomize for new browsers
   ids[myHex] = new paper.Path();
@@ -70,17 +93,27 @@
     var msg = JSON.parse(receivedMessage.data);
 //     console.log(msg);
     if (hash === 'display') {
-//       console.log(msg);
       var thisPoint = new paper.Point(msg.point[1], msg.point[2]);
       thisPoint.x += msg.segment[0];
       thisPoint.y += msg.segment[1];
       if (!(msg.id in ids)) {
+				console.log("New stroke!");
         ids[msg.id] = new paper.Path(thisPoint);
         ids[msg.id].strokeColor = msg.id;
+				ids[msg.id].strokeWidth = 15;
         reg[msg.id] = new paper.Path.Rectangle(msg.segment[0], msg.segment[1], 300, 300);
         reg[msg.id].fillColor = msg.id;
         reg[msg.id].opacity = .1;
+				$("#myCanvas").css('-webkit-animation', 'AnimationName 4s ease infinite');
+				$("#myCanvas").css('-moz-animation', 'AnimationName 4s ease infinite');
+				$("#myCanvas").css('animation', 'AnimationName 4s ease infinite');
+				$("#myCanvas").css('@-webkit-keyframes AnimationName', '0%{background-position:0% 18%} 50%{background-position:100% 83%} 100%{background-position:0% 18%}');
+				$("#myCanvas").css('@-moz-keyframes AnimationName', ' 0%{background-position:0% 18%} 50%{background-position:100% 83%} 100%{background-position:0% 18%}');
+				$("#myCanvas").css('@keyframes AnimationName', '0%{background-position:0% 18%} 50%{background-position:100% 83%} 100%{background-position:0% 18%}');
+				$("#myCanvas").css('background', 'linear-gradient(309deg, #ffffff,' + msg.id+')');
+				console.log(ids)
       } else {
+				ids[msg.id].strokeWidth = 15;
         ids[msg.id].add(thisPoint);
         reg[msg.id].position = [msg.segment[0] + 150, msg.segment[1] + 150];
         if (tiltingStroke) {
@@ -90,11 +123,15 @@
       }
     } else {
       if (msg.id === myHex) {
+				ids[msg.id].strokeWidth = 15;
         ids[msg.id].add([msg.point[1], msg.point[2]]);
         console.log("stroke added");
       }
     }
   }
+	
+
+
   
   
   
@@ -108,7 +145,26 @@
     socket.send(JSON.stringify(msg));
   }
   
-  tool.onM
+	tool.onMouseDown = function(event) {
+		var path = new paper.Path.Circle({
+			center: event.point,
+			radius: Math.floor(Math.random() * 40) + 15,
+			fillColor: 'red'
+		});
+		
+		path.onFrame = function(event) {
+			path.fillColor.hue += 1;
+			path.position.x += path.bounds.width / 20;
+			if (path.bounds.left > 2000) {
+			path.position.x = -path.bounds.width;
+		}
+		}
+
+	}
+	
+
+
+  
   
   var shifting = function() {
     if (!(hash === 'display') && ids[myHex].length > 5) {
@@ -168,7 +224,7 @@
      }
   }
   
- 
+
   
   
 //   //handling shake event
@@ -208,8 +264,10 @@
         z2 = z1;
     }, 150);
 }
+  
+  
+  
 
-    
   
   
 
