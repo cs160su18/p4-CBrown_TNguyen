@@ -11,13 +11,16 @@
     <script type="text/javascript" src="{% static 'draw/vendor/paper/paper-full.min.js' %}"></script>
 
     <style type="text/css">
+      #myCanvas {
+        border-color: "black";
+      }
     </style>
 
 </head>
 <body>
     <!-- You may change the dimensions of this canvas -->
     <span id="owenrox"></span>
-    <canvas id="myCanvas" width="900px" height="900px"></canvas>
+    <canvas id="myCanvas" width="900px" height="900px" style="border:1px solid #000000;"></canvas>
 </body>
 <script>
 
@@ -78,7 +81,7 @@ function onMouseUp(event) {
   if (!(hash === 'display')) {
     console.log('not display')
     myLoc = [Math.random() * 600, Math.random() * 600];
-    var direction = [Math.random() < 0.5 ? -5 : 5, Math.random() < 0.5 ? -5 : 5];
+    var direction = [Math.random() < 0.5 ? -15 : 15, Math.random() < 0.5 ? -15 : 15];
   } else {
     myLoc = [0,0];
   }
@@ -100,10 +103,10 @@ function onMouseUp(event) {
 				console.log("New stroke!");
         ids[msg.id] = new paper.Path(thisPoint);
         ids[msg.id].strokeColor = msg.id;
-				ids[msg.id].strokeWidth = 15;
+				ids[msg.id].strokeWidth = 5;
         reg[msg.id] = new paper.Path.Rectangle(msg.segment[0], msg.segment[1], 300, 300);
         reg[msg.id].fillColor = msg.id;
-        reg[msg.id].opacity = .1;
+        reg[msg.id].opacity = .35;
 				$("#myCanvas").css('-webkit-animation', 'AnimationName 4s ease infinite');
 				$("#myCanvas").css('-moz-animation', 'AnimationName 4s ease infinite');
 				$("#myCanvas").css('animation', 'AnimationName 4s ease infinite');
@@ -113,7 +116,7 @@ function onMouseUp(event) {
 				$("#myCanvas").css('background', 'linear-gradient(309deg, #ffffff,' + msg.id+')');
 				console.log(ids)
       } else {
-				ids[msg.id].strokeWidth = 15;
+				ids[msg.id].strokeWidth = 5;
         ids[msg.id].add(thisPoint);
         reg[msg.id].position = [msg.segment[0] + 150, msg.segment[1] + 150];
         if (tiltingStroke) {
@@ -123,7 +126,7 @@ function onMouseUp(event) {
       }
     } else {
       if (msg.id === myHex) {
-				ids[msg.id].strokeWidth = 15;
+				ids[msg.id].strokeWidth = 5;
         ids[msg.id].add([msg.point[1], msg.point[2]]);
         console.log("stroke added");
       }
